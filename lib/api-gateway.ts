@@ -26,7 +26,7 @@ export class ApiGateway extends Construct {
     }
 
     private createApiGateway(props: ApiGatewayProps) {
-        const apiGateway = new apigateway.RestApi(this, 'ApiGateway', {deployOptions: {tracingEnabled: true,}, ...cors});
+        const apiGateway = new apigateway.RestApi(this, 'BotApiGateway', {deployOptions: {tracingEnabled: true,}, ...cors});
         const api = apiGateway.root.addResource('api');
 
         const health = api.addResource('health');
