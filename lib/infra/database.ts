@@ -1,6 +1,7 @@
 import { RemovalPolicy } from "aws-cdk-lib";
 import { AttributeType, BillingMode, ITable, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
+import { AWS_DYNAMODB_MAIN_TABLE_NAME } from '../app/environment/appConfig';
 
 export class Database extends Construct {
     public readonly contentTable: ITable;
@@ -11,10 +12,10 @@ export class Database extends Construct {
     }
 
     private createContentTable(): ITable {
-        return new Table(this, 'mighty-tigers-content-table', {
+        return new Table(this, 'mighty-tigers-data-table', {
             partitionKey: {name: 'PK', type: AttributeType.STRING,},
             sortKey: {name: 'SK', type: AttributeType.STRING},
-            tableName: 'mightytigers-content',
+            tableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
             removalPolicy: RemovalPolicy.DESTROY,
             billingMode: BillingMode.PAY_PER_REQUEST,
             timeToLiveAttribute: 'expiredAt'

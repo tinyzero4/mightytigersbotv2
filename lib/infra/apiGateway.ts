@@ -33,7 +33,7 @@ export class ApiGateway extends Construct {
         health.addMethod('GET', new apigateway.LambdaIntegration(props.microservices.healthHandler));
 
         const events = api.addResource('events', {...cors});
-        events.addMethod('POST', new apigateway.LambdaIntegration(props.microservices.hooksHandler));
+        events.addMethod('POST', new apigateway.LambdaIntegration(props.microservices.commandsHandler));
 
         new CfnOutput(this, ApiGatewayEndpointStackOutput, {value: apiGateway.url});
         new CfnOutput(this, ApiGatewayDomainStackOutput, {value: apiGateway.url.split('/')[2]});

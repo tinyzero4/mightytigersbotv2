@@ -27,7 +27,8 @@
     "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@models/*": ["src/models/*"],
+      "@app/*": ["lib/app/*"],
+      "@infra/*": ["lib/infra/*"],
       "@root/*": ["/*"]
     }
   },
@@ -39,7 +40,7 @@
     "cdk.out"
   ],
   "include": [
-    "./src/**/*",
+    "./lib/app/**/*",
     "./typings/**/*"
   ]
 }

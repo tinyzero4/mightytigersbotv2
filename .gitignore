@@ -15,3 +15,5 @@ coverage/
 
 jest_reports
 package-lock.json
+
+.idea

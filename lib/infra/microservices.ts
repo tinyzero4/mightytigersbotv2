@@ -5,35 +5,45 @@ import { Aws } from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejsfunction from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
+import { IGrantable } from 'aws-cdk-lib/aws-iam';
+import { IStringParameter } from 'aws-cdk-lib/aws-ssm/lib/parameter';
 
 interface MicroserviceProps {
     contentTable: ITable;
+    parameters: Record<string, IStringParameter>;
 }
 
 export class Microservices extends Construct {
-    public readonly hooksHandler: NodejsFunction;
+    public readonly commandsHandler: NodejsFunction;
     public readonly healthHandler: NodejsFunction;
 
     constructor(scope: Construct, id: string, props: MicroserviceProps) {
         super(scope, id);
-        this.hooksHandler = this.createHooksFunction(props);
+        this.commandsHandler = this.createCommandsHandler(props);
         this.healthHandler = this.createHealthFunction(props);
     }
 
-    private createHooksFunction(props: MicroserviceProps): NodejsFunction {
-        const func = this.createFunction(this, 'hooks', props.contentTable);
+    private createCommandsHandler(props: MicroserviceProps): NodejsFunction {
+        const func = this.createFunction(this, 'command', props.contentTable);
         props.contentTable.grantReadWriteData(func);
+        this.grantParameters(func, props);
         return func;
+    }
+
+    private grantParameters(grantee: IGrantable, props: MicroserviceProps) {
+        for (const p in props.parameters) {
+            props.parameters[p].grantRead(grantee);
+        }
     }
 
     private createHealthFunction(props: MicroserviceProps): NodejsFunction {
         return this.createFunction(this, 'health', props.contentTable);
     }
 
-    private createFunction(scope: Construct, name: string, ddb: ITable, allowedOrigins?: string) {
+    private createFunction(scope: Construct, name: string, ddb: ITable, allowedOrigins?: string): NodejsFunction {
         return new nodejsfunction.NodejsFunction(scope, name, {
             runtime: lambda.Runtime.NODEJS_16_X,
-            entry: path.join(__dirname, `./lambda/${name}.ts`),
+            entry: path.join(__dirname, `../app/endpoints/lambda/${name}.ts`),
             handler: 'lambdaHandler',
             bundling: {
                 externalModules: [

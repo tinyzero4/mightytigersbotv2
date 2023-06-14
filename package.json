@@ -18,7 +18,9 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.178.0",
     "@aws-sdk/client-lambda": "^3.179.0",
+    "@aws-sdk/client-ssm": "^3.352.0",
     "@aws-sdk/lib-dynamodb": "^3.178.0",
+    "@aws-sdk/util-dynamodb": "^3.348.0",
     "@middy/core": "^4.5.0",
     "@types/aws-lambda": "^8.10.115",
     "aws-cdk-lib": "2.82.0",
@@ -30,6 +32,8 @@
     "node-fetch": "^3.2.10",
     "phin": "^3.6.1",
     "source-map-support": "^0.5.21",
+    "telegraf": "^4.12.2",
+    "ulid": "2.3.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -46,6 +50,7 @@
     "nyc": "^15.1.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
+    "typegram": "^5.0.0",
     "typescript": "~5.1.3"
   }
 }

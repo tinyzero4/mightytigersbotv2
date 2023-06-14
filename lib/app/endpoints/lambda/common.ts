@@ -2,7 +2,8 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS || '*';
 
-export class ApiResponse implements APIGatewayProxyResult {
+export class APIResponse implements APIGatewayProxyResult {
+
     public statusCode: number;
     public headers: { [name: string]: string };
     public body: string;
