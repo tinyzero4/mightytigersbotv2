@@ -11,9 +11,9 @@ export class Parameters extends Construct {
         super(scope, id);
         this.parameters = {};
 
-        this.parameters[AWS_PARAM_BOT_TOKEN] = new ssm.StringParameter(this, 'alerts-email-param', {
+        this.parameters[AWS_PARAM_BOT_TOKEN] = new ssm.StringParameter(this, 'param-bot-token', {
             parameterName: `${AWS_PARAM_BOT_TOKEN}`,
-            stringValue: 'TOKEN',
+            stringValue: 'TG_TOKEN',
             description: 'Telegram Bot Token',
             tier: ssm.ParameterTier.STANDARD,
             allowedPattern: '.*',

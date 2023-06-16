@@ -18,18 +18,13 @@ export class Environment {
 }
 
 async function resolveParameters(names: string[]): Promise<Record<string, string>> {
-    try {
-        const r = await client.send(new GetParametersCommand({Names: names, WithDecryption: false,}));
-        if (!r || !r.Parameters) return {};
-        return r.Parameters.map(p => [p.Name || '', p.Value || '']).reduce((acc, c) => ({...acc, [c[0]]: c[1]}), {});
-    } catch (e) {
-        console.error(e);
-        return {};
-    }
+    const r = await client.send(new GetParametersCommand({Names: names, WithDecryption: false,}));
+    if (!r || !r.Parameters) return {};
+    return r.Parameters.map(p => [p.Name || '', p.Value || '']).reduce((acc, c) => ({...acc, [c[0]]: c[1]}), {});
 }
 
 export async function resolveEnvironment(): Promise<Environment> {
-    return new Environment(
-        await resolveParameters([AWS_PARAM_BOT_TOKEN])
-    );
+    const params = await resolveParameters([AWS_PARAM_BOT_TOKEN])
+    console.log(`params=${params}`)
+    return new Environment(params);
 }

@@ -13,4 +13,4 @@ export const MATCH_MIN_PLAYERS = 8
 
 export const AWS_DYNAMODB_MAIN_TABLE_NAME = 'mighty-tigers-data'
 export const AWS_REGION = process.env.AWS_REGION || 'us-east-1'
-export const AWS_PARAM_BOT_TOKEN = '/tg/BOT_TOKEN'
+export const AWS_PARAM_BOT_TOKEN = '/tg/TG_BOT_TOKEN'

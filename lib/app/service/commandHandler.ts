@@ -33,7 +33,7 @@ export class CommandHandler {
                 await messenger.replyTeamScheduleChanged(ctx, team);
             } catch (e) {
                 console.log('[setschedule] issue: ', e);
-                await messenger.replyError(ctx, (e instanceof Error) ? e : new Error('init issue'));
+                await messenger.replyError(ctx, (e instanceof Error) ? e : new Error('setschedule issue'));
             }
         });
     }

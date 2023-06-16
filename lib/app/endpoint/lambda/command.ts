@@ -14,12 +14,11 @@ const tracer = new Tracer(toolsConfig);
 const metrics = new Metrics(toolsConfig);
 
 let commandsHandler: CommandHandler;
-(async () => {
-    commandsHandler = new CommandHandler(await resolveEnvironment());
-})().catch(err => console.error(err));
 
 const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
     try {
+        if (!commandsHandler) commandsHandler = new CommandHandler(await resolveEnvironment());
+
         context.callbackWaitsForEmptyEventLoop = false;
         if (event.body) {
             await commandsHandler.handle(event.body);
@@ -28,7 +27,11 @@ const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGat
             return new APIResponse(400, {message: "no command"});
         }
     } catch (error) {
-        console.error(`[command] issue ${error}`)
+        if (error instanceof Error) {
+            console.error(`[command] issue ${error} ${error?.stack}`);
+        } else {
+            console.error(`[command] issue ${error}`);
+        }
         return new APIResponse(500, {message: (error as Error).message});
     }
 };
