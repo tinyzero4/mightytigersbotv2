@@ -29,7 +29,8 @@ export class CommandHandler {
         this.tg.command('setschedule', async (ctx) => {
             try {
                 const {id} = ctx.chat as Chat.GroupChat;
-                const team = await cases.setTeamSchedule(id.toString(), ctx.message.text);
+                const scheduleValue = ctx.message.text.substring(ctx.message.text.lastIndexOf(" ") + 1)
+                const team = await cases.setTeamSchedule(id.toString(), scheduleValue);
                 await messenger.replyTeamScheduleChanged(ctx, team);
             } catch (e) {
                 console.log('[setschedule] issue: ', e);

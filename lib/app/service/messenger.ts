@@ -18,7 +18,7 @@ export class Messenger {
     }
 
     async replyErrorMessage(context: Context, error: string = 'Oops, smth went wrong'): Promise<Message.TextMessage> {
-        return context.replyWithMarkdownV2(error);
+        return context.replyWithHTML(error);
     }
 
 }

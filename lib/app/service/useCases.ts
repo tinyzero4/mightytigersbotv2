@@ -27,9 +27,9 @@ export class UseCases {
     }
 
     private parseSchedule(scheduleValue: string): string[] {
-        const schedule = scheduleValue.split(",");
+        const schedule = scheduleValue.substring(scheduleValue.lastIndexOf(" ")).trim().split(",");
         if (!schedule.length || schedule.some(s => !s.match(TEAM_SCHEDULE_PATTERN))) {
-            throw Error('Invalid schedule definition. Should be `WEEK_DAY@HH:MM,`');
+            throw Error(`Invalid schedule definition '${scheduleValue}', should be \`WEEK_DAY@HH:MM,\``);
         }
         return schedule;
     }
