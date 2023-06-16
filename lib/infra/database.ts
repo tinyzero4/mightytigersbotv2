@@ -1,7 +1,7 @@
 import { RemovalPolicy } from "aws-cdk-lib";
 import { AttributeType, BillingMode, ITable, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
-import { AWS_DYNAMODB_MAIN_TABLE_NAME } from '../app/environment/appConfig';
+import { AWS_DYNAMODB_MAIN_TABLE_NAME } from '../app/service/config';
 
 export class Database extends Construct {
     public readonly contentTable: ITable;

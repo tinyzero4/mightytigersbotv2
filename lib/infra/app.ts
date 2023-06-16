@@ -2,10 +2,10 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Database } from './database';
 import { Microservices } from './microservices';
-import { ApiGateway } from './apiGateway';
+import { Gateway } from './gateway';
 import { Parameters } from './parameters';
 
-export class AppStack extends Stack {
+export class App extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
@@ -15,6 +15,6 @@ export class AppStack extends Stack {
             contentTable: database.contentTable,
             parameters: parameters.parameters
         });
-        const apigateway = new ApiGateway(this, 'ApiGateway', {microservices});
+        const apigateway = new Gateway(this, 'ApiGateway', {microservices});
     }
 }

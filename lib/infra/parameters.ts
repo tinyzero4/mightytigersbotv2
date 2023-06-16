@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { IStringParameter } from 'aws-cdk-lib/aws-ssm/lib/parameter';
-import { AWS_PARAM_BOT_TOKEN } from '../app/environment/appConfig';
+import { AWS_PARAM_BOT_TOKEN } from '../app/service/config';
 
 export class Parameters extends Construct {
 

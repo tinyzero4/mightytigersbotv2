@@ -1,12 +1,11 @@
 import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm";
-import { AWS_PARAM_BOT_TOKEN, AWS_REGION } from './appConfig';
+import { AWS_PARAM_BOT_TOKEN, AWS_REGION } from '@app/service/config';
 
 const client = new SSMClient({
     region: AWS_REGION,
 });
 
-export class AppEnvironment {
-
+export class Environment {
     public readonly params: Record<string, string>;
 
     constructor(params: Record<string, string>) {
@@ -29,8 +28,8 @@ async function resolveParameters(names: string[]): Promise<Record<string, string
     }
 }
 
-export async function resolveEnvironment(): Promise<AppEnvironment> {
-    return new AppEnvironment(
+export async function resolveEnvironment(): Promise<Environment> {
+    return new Environment(
         await resolveParameters([AWS_PARAM_BOT_TOKEN])
     );
 }

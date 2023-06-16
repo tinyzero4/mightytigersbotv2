@@ -7,7 +7,7 @@ export const ApiGatewayEndpointStackOutput = 'ApiEndpoint';
 export const ApiGatewayDomainStackOutput = 'ApiDomain';
 export const ApiGatewayStageStackOutput = 'ApiStage';
 
-interface ApiGatewayProps {
+interface GatewayProps {
     microservices: Microservices,
 }
 
@@ -18,14 +18,14 @@ const cors = {
     }
 };
 
-export class ApiGateway extends Construct {
+export class Gateway extends Construct {
 
-    constructor(scope: Construct, id: string, props: ApiGatewayProps) {
+    constructor(scope: Construct, id: string, props: GatewayProps) {
         super(scope, id);
         this.createApiGateway(props);
     }
 
-    private createApiGateway(props: ApiGatewayProps) {
+    private createApiGateway(props: GatewayProps) {
         const apiGateway = new apigateway.RestApi(this, 'BotApiGateway', {deployOptions: {tracingEnabled: true,}, ...cors});
         const api = apiGateway.root.addResource('api');
 

@@ -5,7 +5,7 @@ import { Metrics, logMetrics } from '@aws-lambda-powertools/metrics';
 import middy from '@middy/core';
 import { APIResponse } from './common';
 import { CommandHandler } from '@app/service/commandHandler';
-import { resolveEnvironment } from '@app/environment/appEnvironment';
+import { resolveEnvironment } from '@app/service/environment';
 import * as console from 'console';
 
 const toolsConfig = {namespace: 'bot', serviceName: 'mightytigers'};

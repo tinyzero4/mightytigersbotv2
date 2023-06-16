@@ -1,9 +1,8 @@
-import { Team } from '../domain/team';
-
-const {ulid} = require('ulid');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
-import { AWS_REGION, AWS_DYNAMODB_MAIN_TABLE_NAME } from '@app/environment/appConfig';
-import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, UpdateCommand, UpdateCommandOutput } from '@aws-sdk/lib-dynamodb';
+
+import { Team } from '@app/domain/team';
+import { AWS_REGION, AWS_DYNAMODB_MAIN_TABLE_NAME } from '@app/service/config';
 
 export class DataRepository {
 
@@ -18,11 +17,11 @@ export class DataRepository {
         }));
     }
 
-    public async initTeam(team: Team): Promise<Team> {
+    async initTeam(team: Team): Promise<Team> {
         const command = new UpdateCommand({
             TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
             Key: {'PK': team.id, 'SK': team.id},
-            UpdateExpression: "SET #name=:name, #created=:created, #schedule=:schedule",
+            UpdateExpression: "SET #name=:name, #created=if_not_exists(#created, :created), #schedule=:schedule",
             ExpressionAttributeNames: {
                 '#name': 'name',
                 '#schedule': 'schedule',
@@ -37,7 +36,28 @@ export class DataRepository {
         });
 
         const response = await this.client.send(command);
+        return this.responseToTeam(response);
+    }
 
+    async setTeamSchedule(teamId: String, schedule: string[]): Promise<Team> {
+        const command = new UpdateCommand({
+            TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
+            Key: {'PK': teamId, 'SK': teamId},
+            UpdateExpression: "SET #schedule=:schedule",
+            ExpressionAttributeNames: {
+                '#schedule': 'schedule',
+            },
+            ExpressionAttributeValues: {
+                ":schedule": schedule,
+            },
+            ReturnValues: "ALL_NEW"
+        });
+
+        const response = await this.client.send(command);
+        return this.responseToTeam(response);
+    }
+
+    private responseToTeam(response: UpdateCommandOutput): Team {
         return {
             id: response.Attributes?.['PK'],
             name: response.Attributes?.['name'],
@@ -46,7 +66,4 @@ export class DataRepository {
         };
     }
 
-    public async findTeam(id: string): Promise<Team | undefined> {
-        return {} as Team;
-    }
 }

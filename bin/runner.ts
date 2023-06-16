@@ -2,9 +2,9 @@
 
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { AppStack } from '../lib/infra/appStack';
+import { App } from '../lib/infra/app';
 
 const app = new cdk.App();
 
 export const stackName = 'mightytigersbot-v2-stack';
-new AppStack(app, stackName, {});
+new App(app, stackName, {});

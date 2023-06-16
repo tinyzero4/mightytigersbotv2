@@ -43,7 +43,7 @@ export class Microservices extends Construct {
     private createFunction(scope: Construct, name: string, ddb: ITable, allowedOrigins?: string): NodejsFunction {
         return new nodejsfunction.NodejsFunction(scope, name, {
             runtime: lambda.Runtime.NODEJS_16_X,
-            entry: path.join(__dirname, `../app/endpoints/lambda/${name}.ts`),
+            entry: path.join(__dirname, `../app/endpoint/lambda/${name}.ts`),
             handler: 'lambdaHandler',
             bundling: {
                 externalModules: [

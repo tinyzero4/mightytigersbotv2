@@ -1,6 +1,7 @@
 export const VERSION = "2.0.0"
 
-export const TEAM_DEFAULT_SCHEDULE = ["2@05:30", "4@05:30"]
+export const TEAM_SCHEDULE_DEFAULTS = ["2@05:30", "4@05:30"]
+export const TEAM_SCHEDULE_PATTERN = /^[1-7]@[0-9]{2}:[0-5][0-9]$/
 
 export const MATCH_ACK_TYPES = [
     {value: "⚽", label: "⚽[PLAY]", going: true},

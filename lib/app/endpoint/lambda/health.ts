@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { APIResponse } from './common';
-import { VERSION } from '../../environment/appConfig';
+import { VERSION } from '../../service/config';
 
 export const lambdaHandler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
     try {
