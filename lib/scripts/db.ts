@@ -52,16 +52,16 @@ async function create(team: Team): Promise<Team> {
         ReturnValues: "ALL_NEW"
     });
     const response = await client.send(command);
-    return {
-        id: response.Attributes['PK'],
-        name: response.Attributes['name'],
-        created: new Date(response.Attributes['created']),
-        schedule: response.Attributes['schedule']
-    };
+    return new Team(
+        response.Attributes['PK'],
+        response.Attributes['name'],
+        new Date(response.Attributes['created']),
+        response.Attributes['schedule']
+    );
 }
 
 async function run() {
-    const team: Team = {id: ulid(), name: 't1', created: new Date()};
+    const team: Team = new Team(ulid(), 't1', new Date());
     const r1 = await create(team);
     console.log(`r1=${JSON.stringify(r1)}`);
     const response = await find(team.id, team.id);

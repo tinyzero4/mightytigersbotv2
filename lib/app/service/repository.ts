@@ -1,5 +1,11 @@
+import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
+
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
-import { DynamoDBDocument, UpdateCommand, UpdateCommandOutput } from '@aws-sdk/lib-dynamodb';
+import {
+    DynamoDBDocument,
+    GetCommand,
+    UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
 
 import { Team } from '@app/domain/team';
 import { AWS_REGION, AWS_DYNAMODB_MAIN_TABLE_NAME } from '@app/service/config';
@@ -20,7 +26,7 @@ export class DataRepository {
     async initTeam(team: Team): Promise<Team> {
         const command = new UpdateCommand({
             TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
-            Key: {'PK': team.id, 'SK': team.id},
+            Key: {'PK': this.toTeamPK(team.id), 'SK': this.toTeamSK(team.id)},
             UpdateExpression: "SET #name=:name, #created=if_not_exists(#created, :created), #schedule=:schedule",
             ExpressionAttributeNames: {
                 '#name': 'name',
@@ -36,13 +42,17 @@ export class DataRepository {
         });
 
         const response = await this.client.send(command);
-        return this.responseToTeam(response);
+        return this.responseToTeam(response.Attributes);
+    }
+
+    async reschedule(team: Team): Promise<Team> {
+        return await this.setTeamSchedule(team.id, team.schedule);
     }
 
     async setTeamSchedule(teamId: String, schedule: string[]): Promise<Team> {
         const command = new UpdateCommand({
             TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
-            Key: {'PK': teamId, 'SK': teamId},
+            Key: {'PK': this.toTeamPK(teamId), 'SK': this.toTeamSK(teamId)},
             UpdateExpression: "SET #schedule=:schedule",
             ExpressionAttributeNames: {
                 '#schedule': 'schedule',
@@ -54,16 +64,34 @@ export class DataRepository {
         });
 
         const response = await this.client.send(command);
-        return this.responseToTeam(response);
+        return this.responseToTeam(response.Attributes);
     }
 
-    private responseToTeam(response: UpdateCommandOutput): Team {
-        return {
-            id: response.Attributes?.['PK'],
-            name: response.Attributes?.['name'],
-            created: new Date(response.Attributes?.['created']),
-            schedule: response.Attributes?.['schedule']
-        };
+    async getTeam(teamId: String): Promise<Team> {
+        const command = new GetCommand({
+            TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
+            Key: {'PK': this.toTeamPK(teamId), 'SK': this.toTeamSK(teamId)},
+        });
+        const response = await this.client.send(command);
+        return this.responseToTeam(response.Item);
+    }
+
+    private responseToTeam(attributes?: Record<string, NativeAttributeValue>): Team {
+        if (!attributes) throw new Error('No team definition');
+        return new Team(
+            attributes?.['PK'],
+            attributes?.['name'],
+            new Date(attributes?.['created']),
+            attributes?.['schedule']
+        );
+    }
+
+    private toTeamPK(teamId: String): string {
+        return `TEAM#${teamId}`;
+    }
+
+    private toTeamSK(teamId: String): string {
+        return `DEF#${teamId}`;
     }
 
 }

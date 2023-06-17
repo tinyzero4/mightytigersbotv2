@@ -7,22 +7,20 @@ export class UseCases {
     private readonly repository = new DataRepository();
 
     async initTeam(teamId: string, teamName: string): Promise<Team> {
-        return this.repository.initTeam({
-            id: teamId,
-            name: teamName,
-            created: new Date(),
-            schedule: TEAM_SCHEDULE_DEFAULTS
-        });
+        return this.repository.initTeam(new Team(teamId, teamName, new Date(), TEAM_SCHEDULE_DEFAULTS));
     }
 
     async setTeamSchedule(teamId: string, scheduleValue: string): Promise<Team> {
-        const schedule = this.parseSchedule(scheduleValue);
-        const team = await this.repository.setTeamSchedule(teamId, schedule);
-        await this.cleanObsoleteMatches(team);
+        const team = await this.repository.getTeam(teamId);
+        team.reschedule(scheduleValue)
+
+        await this.repository.reschedule(team);
+        await this.onNewSchedule(team);
+
         return team;
     }
 
-    private async cleanObsoleteMatches(team: Team) {
+    private async onNewSchedule(team: Team) {
         // await matchService.cancelObsoleteMatches(team.team_id);
     }
 
