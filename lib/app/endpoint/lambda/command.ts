@@ -4,7 +4,7 @@ import { Tracer, captureLambdaHandler } from '@aws-lambda-powertools/tracer';
 import { Metrics, logMetrics } from '@aws-lambda-powertools/metrics';
 import middy from '@middy/core';
 import { APIResponse } from './common';
-import { CommandHandler } from '@app/service/commandHandler';
+import { UseCases } from '@app/service/useCases';
 import { resolveEnvironment } from '@app/service/environment';
 import * as console from 'console';
 
@@ -13,15 +13,15 @@ const logger = new Logger(toolsConfig);
 const tracer = new Tracer(toolsConfig);
 const metrics = new Metrics(toolsConfig);
 
-let commandsHandler: CommandHandler;
+let cases: UseCases;
 
 const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
     try {
-        if (!commandsHandler) commandsHandler = new CommandHandler(await resolveEnvironment());
+        if (!cases) cases = new UseCases(await resolveEnvironment());
 
         context.callbackWaitsForEmptyEventLoop = false;
         if (event.body) {
-            await commandsHandler.handle(event.body);
+            await cases.handle(event.body);
             return new APIResponse(200, {});
         } else {
             return new APIResponse(400, {message: "no command"});

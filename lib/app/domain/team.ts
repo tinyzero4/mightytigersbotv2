@@ -22,7 +22,7 @@ export class Team {
         this.weeklySchedule = schedule.sort();
     }
 
-    getNextEventDate(now: Date): Date {
+    getNextEventDate(now: Date = new Date()): Date {
         if (!this.schedule || !this.schedule.length) throw new Error('No schedule is defined')
 
         const nextOnCurrentWeek = this.schedule.map(event => this.eventToDate(event, now)).find(date => date > now);
