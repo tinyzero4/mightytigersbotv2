@@ -10,6 +10,8 @@ import {
 import { Team } from '@app/domain/team';
 import { AWS_REGION, AWS_DYNAMODB_MAIN_TABLE_NAME } from '@app/service/config';
 import { Confirmation, Match, MatchStatus, PlayersNames, Squad, WithMe } from '@app/domain/match';
+import { ConfirmEvent } from '@app/domain/confirm';
+import moment from 'moment/moment';
 
 const marshallOptions = {
     convertEmptyValues: false,
@@ -22,13 +24,6 @@ const unmarshallOptions = {
     wrapNumbers: false,
 };
 
-/**
- * TEAM#{TID}
- * TEAM#{TID}#MATCH#{MID}
- * SQUAD#{PID}#CONFIRMATION#{CONFIRMATION}
- * SQUAD#{PID}#CD#TS{DATE}
- * WM#{PID}#COUNT{NUMBER}
- */
 export class DataRepository {
 
     private readonly client: DynamoDBDocument;
@@ -128,6 +123,15 @@ export class DataRepository {
         return this.responseToMatch(response.Attributes);
     }
 
+    async getMatch(teamId: string, matchId: string): Promise<Match> {
+        const command = new GetCommand({
+            TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
+            Key: {'PK': this.generatePK(teamId), 'SK': this.generateMatchSK(matchId)},
+        });
+        const response = await this.client.send(command);
+        return this.responseToMatch(response.Item);
+    }
+
     async linkMatchDetailsMessage(teamId: string, matchId: string, messageId: string): Promise<boolean> {
         const command = new UpdateCommand({
             TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
@@ -196,6 +200,31 @@ export class DataRepository {
         return this.responseToMatch(response.Attributes);
     }
 
+    async trackConfirmEvent(event: ConfirmEvent): Promise<ConfirmEvent> {
+        const command = new UpdateCommand({
+            TableName: AWS_DYNAMODB_MAIN_TABLE_NAME,
+            Key: {'PK': this.generatePK(event.teamId), 'SK': this.generateEventSK(event.eventId)},
+            UpdateExpression: `SET #expiredAt=:expiredAt, #eventId=:eventId, #data=:data, #version=if_not_exists(#version, :versionDefault) + :versionInc`,
+            ExpressionAttributeNames: {
+                '#expiredAt': 'expiredAt',
+                '#eventId': 'eventId',
+                '#data': 'data',
+                '#version': 'version',
+            },
+            ExpressionAttributeValues: {
+                ":expiredAt": moment(new Date()).add(2, 'days').toDate().getTime(),
+                ":eventId": event.eventId,
+                ":data": JSON.stringify(event),
+                ":versionDefault": 0,
+                ":versionInc": 1,
+            },
+            ReturnValues: "ALL_NEW"
+        });
+
+        const response = await this.client.send(command);
+        return this.responseToEvent(response.Attributes);
+    }
+
     private extractId(value: string): string {
         return value.split("#")[1];
     }
@@ -214,8 +243,8 @@ export class DataRepository {
         if (!attributes) throw new Error('Invalid match definition');
         const attrs = attributes!;
 
-        const id = this.extractId(attrs['SK']);
         const teamId = this.extractId(attrs['PK']);
+        const matchId = this.extractId(attrs['SK']);
         const start = new Date(attrs['start']);
         const messageId = attrs['messageId'];
         const status = attrs['status'];
@@ -225,7 +254,20 @@ export class DataRepository {
         const withMe = (attrs['wm'] || {}) as WithMe;
         const players = (attrs['players'] || {}) as PlayersNames;
 
-        return new Match(id, teamId, start, messageId, squad, withMe, players, status, created, version);
+        return new Match(matchId, teamId, start, messageId, squad, withMe, players, status, created, version);
+    }
+
+    private responseToEvent(attributes?: Record<string, NativeAttributeValue>): ConfirmEvent {
+        if (!attributes) throw new Error('Invalid match definition');
+        const attrs = attributes!;
+
+        const data = attrs['data'];
+        const version = attrs['version'];
+
+        const event = JSON.parse(data) as ConfirmEvent;
+        event.version = version;
+
+        return event;
     }
 
     private generatePK(teamId: string): string {
@@ -238,6 +280,10 @@ export class DataRepository {
 
     private generateMatchSK(id: string): string {
         return `MATCH#${id}`;
+    }
+
+    private generateEventSK(id: string): string {
+        return `EVENT#${id}`;
     }
 
 }

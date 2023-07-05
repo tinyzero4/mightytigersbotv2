@@ -1,10 +1,8 @@
 import moment from 'moment/moment';
-import { MATCH_CONFIRMATION_TYPES } from '@app/service/config';
+import { MATCH_CONFIRMATION_TYPE_Y, MATCH_CONFIRMATION_TYPES } from '@app/service/config';
 
 export enum MatchStatus {
     SCHEDULED,
-    IN_PROGRESS,
-    CANCELLED,
     COMPLETED
 }
 
@@ -48,7 +46,7 @@ export class Match {
         public readonly squad: Squad = {},
         public readonly withMe: WithMe = {},
         public readonly players: PlayersNames = {},
-        public readonly status: MatchStatus = MatchStatus.SCHEDULED,
+        private status: MatchStatus = MatchStatus.SCHEDULED,
         public readonly created: Date = new Date(),
         public readonly version: number = 0
     ) {
@@ -56,8 +54,28 @@ export class Match {
 
     getTotalPlayers(): number {
         const countWm = Object.values(this.withMe).filter(v => v > 0).reduce((a, b) => a + b, 0);
-        const countDirect = Object.values(this.squad).filter(v => v.confirmation == 'GO').length;
+        const countDirect = Object.values(this.squad).filter(v => v.confirmation == MATCH_CONFIRMATION_TYPE_Y).length;
         return countDirect + countWm;
+    }
+
+    hasCompleted(): boolean {
+        return this.status == MatchStatus.COMPLETED;
+    }
+
+    hasStarted(): boolean {
+        return this.start < new Date();
+    }
+
+    isAllBetsAreOff(): boolean {
+        return this.hasCompleted() || this.hasStarted();
+    }
+
+    isLinked(): boolean {
+        return !!this.messageId;
+    }
+
+    complete() {
+        this.status = MatchStatus.COMPLETED;
     }
 
     private getConfirmationsByType(): Record<string, Confirmation[]> {
